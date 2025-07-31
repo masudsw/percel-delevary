@@ -4,12 +4,12 @@ const addressSchema = new Schema<IAddressFormat>({
     address: { type: String, required: true },
     district: { type: String, required: true },
     country: { type: String, required: true }
-})
+},{_id:false})
 const dimensionSchema = new Schema<IDimentions>({
     height: { type: Number, required: true },
     width: { type: Number, required: true },
     length: { type: Number, required: true }
-})
+},{_id:false})
 
 const parcelSchema = new Schema<IParcel>({
     trackingId: { type: String, unique: true, required: true },
@@ -48,6 +48,5 @@ const parcelSchema = new Schema<IParcel>({
         default: STATUS.REQUESTED
     }
 
-
-})
+},{timestamps:true})
 export const Parcel = model<IParcel>("Parcel", parcelSchema)

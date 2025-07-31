@@ -7,4 +7,5 @@ const router=Router()
 router.post('/login',
     valiateRequest(loginUserZodSchema),
     AuthController.login)
+router.post('/logout',AuthController.logout)
 export const AuthRouter=router

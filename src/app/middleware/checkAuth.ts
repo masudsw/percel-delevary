@@ -21,6 +21,7 @@ export const checkAuth = (...authUsers: string[]) => async (req: Request, res: R
             throw new AppError(httpStatus.FORBIDDEN,"you are not permitted to view this route!!!")
         }
         req.user=verifiedToken
+        next()
 
     } catch (error) {
         console.log("jwt error", error)

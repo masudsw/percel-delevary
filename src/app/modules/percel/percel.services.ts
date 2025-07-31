@@ -14,42 +14,20 @@ const generateUniqueTrackingId = () => {
     return `TRK-${datePart}-${randomPart}`
 }
 
-const createParcel = async (senderId: string, payload: Partial<IParcel>) => {
+const createParcel = async (payload: Partial<IParcel>) => {
     const trackingId = generateUniqueTrackingId();
-    const isUser=await User.find({_id:senderId})
-    if(!isUser){
-        throw new AppError(httpStatus.NOT_FOUND,"User not found")
-    }
 
-    const newPercel = {
-        ...payload,
-        sender: senderId,
-        trackingId,
-        currentStatus: STATUS.REQUESTED,
-        statusLogs: [{
-            status: STATUS.REQUESTED,
-            timestamp: new Date(),
-            location: payload?.location,
-            notes: payload?.statusLogs.notes
+    const newPayload={trackingId, ...payload}
 
-        }]
-
-
-
-    }
-
-
-    const user = await Parcel.create()
-    return user
+    const percel = await Parcel.create(newPayload)
+    return percel
 }
 const getAllParcel = async (payload: Partial<IParcel>) => {
     const trackingId = generateUniqueTrackingId();
-
     console.log(payload)
-
-
-    const user = await Parcel.create()
-    return user
+    const newPayload = { trackingId, ...payload }
+    const percel = await Parcel.create(newPayload)
+    return percel
 }
 
 const cancelParcel = async (payload: Partial<IParcel>) => {
