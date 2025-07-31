@@ -3,6 +3,7 @@ import { User } from "../user/user.model";
 import httpStatus from "http-status-codes"
 import bcrypt from "bcryptjs"
 import { createUserToken } from "../../utils/userToken";
+import AppError from "../../errorHelpers/AppError";
 
 
 const login=async(payload:Partial<IUser>)=>{
@@ -18,7 +19,7 @@ const login=async(payload:Partial<IUser>)=>{
     const userToken=createUserToken(isUserExist)
     const {password:pass, ...rest}=isUserExist
     return{
-        accssToken:userToken.accssToken,
+        accssToken:userToken,
         user:rest
     }
 }

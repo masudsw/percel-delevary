@@ -3,9 +3,11 @@ import { User } from "./user.model";
 import httpStatus from "http-status-codes"
 import bcryptjs from "bcryptjs"
 import { envVars } from "../../config/env";
+import AppError from "../../errorHelpers/AppError";
 
 
 const createUser = async (payload: Partial<IUser>) => {
+    console.log(payload)
     const { name, email, password, phone, address } = payload;
     const isUserExist = await User.findOne({ email })
     if (isUserExist) {
@@ -22,7 +24,7 @@ const createUser = async (payload: Partial<IUser>) => {
     return user
 }
 
-const getAllUsers = async (payload: Partial<IUser>) => {
+const getAllUsers = async () => {
 
     const users = await User.find({})
     const totalUsers = await User.countDocuments();

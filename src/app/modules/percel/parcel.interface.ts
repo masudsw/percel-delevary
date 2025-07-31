@@ -1,17 +1,17 @@
 import { Types } from "mongoose";
-interface statusLog{
-    status:string,
+export interface IStatusLog{
+    status:STATUS
     timestamp:Date,
     location:string,
     notes:string
 }
 
-interface IAddressFormat{
+export interface IAddressFormat{
     address:string,
     district:string,
     country:string
 }
-interface IDimentions{
+export interface IDimentions{
     length:number;
     width:number;
     height:number;
@@ -25,12 +25,17 @@ export enum STATUS{
     
 }
 
-export interface IPercel{
+export interface IParcel{
+    trackingId:string,
     sender:Types.ObjectId;
     receiver:Types.ObjectId;
     originAddress:IAddressFormat;
     destinationAddress:IAddressFormat;
+    description:string,
+    shippingFee:number,
+    estimatedDeliveryDate:Date,
+    currentStatus:STATUS,
     weight:number;
     dimentions:IDimentions;
-    statusLogs:statusLog[]
+    statusLogs:IStatusLog[]
 }
