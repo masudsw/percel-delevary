@@ -1,6 +1,6 @@
 import AppError from "../../errorHelpers/AppError";
 import { User } from "../user/user.model";
-import { IParcel, STATUS } from "./parcel.interface";
+import { IParcel, IStatusLog, STATUS } from "./parcel.interface";
 import { Parcel } from "./percel.model";
 import httpStatus from "http-status-codes"
 
@@ -16,39 +16,80 @@ const generateUniqueTrackingId = () => {
 
 const createParcel = async (payload: Partial<IParcel>) => {
     const trackingId = generateUniqueTrackingId();
+    const statusLogs: IStatusLog[] = [{
+        status: STATUS.REQUESTED,
+        timestamp: new Date(),
+        location: payload.originAddress?.district || 'Unknown',
+        notes: 'Parcel created'
+    }];
 
-    const newPayload={trackingId, ...payload}
+    const newPayload = {
+        ...payload,
+        trackingId,
+        currentStatus: STATUS.REQUESTED, // Ensure status is set
+        statusLogs
+    };
 
     const percel = await Parcel.create(newPayload)
     return percel
 }
-const getAllParcel = async (payload: Partial<IParcel>) => {
-    const trackingId = generateUniqueTrackingId();
-    console.log(payload)
-    const newPayload = { trackingId, ...payload }
-    const percel = await Parcel.create(newPayload)
-    return percel
+
+const getAllParcel = async () => {
+    const percels = await Parcel.find({})
+    return percels
+}
+const getMyParcels = async (userId:string) => {
+    const percels = await Parcel.find({userId}).sort({createdAt:-1})
+    return percels
 }
 
-const cancelParcel = async (payload: Partial<IParcel>) => {
-    const trackingId = generateUniqueTrackingId();
-    console.log(payload)
-    const user = await Parcel.create()
-    return user
+const cancelParcel = async (trackingId:string) => {
+    
+    const parcel = await Parcel.findOne({trackingId})
+    if(!parcel){
+        throw new AppError(httpStatus.BAD_REQUEST,"Percel does not exists")
+    }
+    if(parcel.currentStatus===STATUS.CANCELLED){
+        throw new AppError(httpStatus.BAD_REQUEST,"Percel is already cancelled");
+    }
+    if(parcel.currentStatus===STATUS.DELIVERED){
+        throw new AppError(httpStatus.BAD_REQUEST,"Percel is already delivered");
+    }
+    return parcel
 }
+const undateParcel = async (trackingId:string) => {
+    const parcel = await Parcel.findOne({trackingId})
+    return parcel
+}
+const markAsReceived=async(trackingId:string,receiverPhone:string)=>{
+    const parcel=await Parcel.findOne({trackingId})
+    if(!parcel){
+        throw new AppError(httpStatus.BAD_REQUEST,"Incorrect tarckingId")
+    }
+    if(parcel.receiverPhone!=receiverPhone){
+        throw new AppError(httpStatus.FORBIDDEN,"You are not authoried to receive")
+    }
+    if(parcel.currentStatus===STATUS.DELIVERED){
+        throw new AppError(httpStatus.FORBIDDEN,"Parcel is already marked as received")
+    }
+    parcel.currentStatus=STATUS.DELIVERED
+    parcel.statusLogs.push({
+        status: STATUS.DELIVERED,
+        timestamp: new Date(),
+        location: parcel.destinationAddress?.district || 'Unknown',
+        notes: `Received by ${parcel.receiverPhone}`
+    })
+    parcel.save();
+    return parcel
 
-const undateParcel = async (payload: Partial<IParcel>) => {
-    //different property will be updated by different
-    const trackingId = generateUniqueTrackingId();
-    console.log(payload)
-    const user = await Parcel.create()
-    return user
 }
 
 
 export const ParcelServices = {
     createParcel,
+    getMyParcels,
     getAllParcel,
     cancelParcel,
-    undateParcel
+    undateParcel,
+    markAsReceived
 }
