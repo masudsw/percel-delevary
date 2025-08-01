@@ -7,12 +7,16 @@ import { User } from "../modules/user/user.model";
 import httpStatus from "http-status-codes"
 
 export const checkAuth = (...authUsers: string[]) => async (req: Request, res: Response, next: NextFunction) => {
+    console.log("auth users",authUsers)
     try {
         const accessToken = req.cookies.accessToken;
+        console.log("inside try block....")
+
         if (!accessToken) {
             throw new AppError(403, "No token received")
         }
         const verifiedToken = verifyToken(accessToken, envVars.JWT_ACCESS_SECRET) as JwtPayload
+        console.log("verified token",verifiedToken)
         const isUserExist = await User.findOne({ email: verifiedToken.email })
         if (!isUserExist) {
             throw new AppError(httpStatus.BAD_REQUEST, "User does not exist")
@@ -24,6 +28,7 @@ export const checkAuth = (...authUsers: string[]) => async (req: Request, res: R
         next()
 
     } catch (error) {
+        console.log("inside catch block")
         console.log("jwt error", error)
         next(error)
     }

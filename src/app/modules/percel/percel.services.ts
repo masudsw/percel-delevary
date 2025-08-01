@@ -4,6 +4,7 @@ import { User } from "../user/user.model";
 import { IAddressFormat, IParcel, IStatusLog, STATUS } from "./parcel.interface";
 import { Parcel } from "./percel.model";
 import httpStatus from "http-status-codes"
+import { Response} from "express";
 
 const generateUniqueTrackingId = () => {
     const now = new Date();
@@ -55,9 +56,12 @@ const createParcel = async (payload: Partial<IParcel>) => {
     return percel
 }
 
-const getAllParcel = async () => {
-    const percels = await Parcel.find({})
-    return percels
+const getAllParcel = async (res:Response) => {
+   const {results,meta}=res.locals.data;
+   return{
+    results,
+    meta
+   }
 }
 const getMyParcels = async (userId: string) => {
     const percels = await Parcel.find({ userId }).sort({ createdAt: -1 })

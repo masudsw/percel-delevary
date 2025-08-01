@@ -5,6 +5,8 @@ import { ParcelController } from "./parcel.controller"
 import { checkAuth } from "../../middleware/checkAuth"
 import { UserType } from "../user/user.interface"
 import { adminUpdateParcelZodSchema, createParcelZodSchema, parcelTarckingZodSchema } from "./percel.validation"
+import { Parcel } from "./percel.model"
+import { queryBuilder } from "../../middleware/queryBuilder"
 
 const router = express.Router()
 router.post("/newparcel",
@@ -16,7 +18,12 @@ router.patch(
     checkAuth(UserType.ADMIN),
     ParcelController.inTransitParcel
 );
-
+console.log("Passing role to checkAuth:", UserType.RECEIVER); // Should log "RECEIVER"
+router.patch(
+  '/:trackingId/status/mark-received',
+  checkAuth(UserType.RECEIVER),
+  ParcelController.markAsReceived
+);
 router.patch(
     '/:trackingId/status/mark-received',
     checkAuth(UserType.RECEIVER),
@@ -27,12 +34,17 @@ router.patch(
     valiateRequest(adminUpdateParcelZodSchema),
     checkAuth(UserType.ADMIN),
     ParcelController.pickParcel
-
 )
 router.get(
     '/:trackingId/status',
     // valiateRequest(parcelTarckingZodSchema),
     ParcelController.parcelStatus
+)
+router.get(
+    '/',
+    checkAuth(UserType.ADMIN),
+    queryBuilder(Parcel,['receiverName','description']),
+    ParcelController.getAllParcel
 )
 
 export const ParcelRouter = router

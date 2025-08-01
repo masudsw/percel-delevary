@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { ParcelServices } from "./percel.services";
+import AppError from "../../errorHelpers/AppError";
 
 const createParcel = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
@@ -38,13 +39,16 @@ const getMyPercels = catchAsync(
 )
 const getAllParcel = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
-        const parcels = await ParcelServices.getAllParcel();
+        if (!res.locals?.data) {
+            throw new AppError(httpStatus.NOT_FOUND, 'No parcels found');
+        }
+        const { results, meta } = await ParcelServices.getAllParcel(res);
 
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.OK,
             message: "Parcels retrieved successfully",
-            data: parcels
+            data: results
         });
 
     });
