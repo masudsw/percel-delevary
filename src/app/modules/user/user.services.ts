@@ -7,19 +7,16 @@ import AppError from "../../errorHelpers/AppError";
 
 
 const createUser = async (payload: Partial<IUser>) => {
-    console.log(payload)
-    const { name, email, password, phone, address } = payload;
+    const { email, password } = payload;
     const isUserExist = await User.findOne({ email })
     if (isUserExist) {
-        throw new AppError(httpStatus.BAD_REQUEST, "User already exist")
+        throw new AppError(httpStatus.CONFLICT, "User already exist")
     }
     const hashedPassword = await bcryptjs.hash(password as string, Number(envVars.BCRYPT_SALT_ROUND))
     const user = await User.create({
-        name,
-        email,
+        ...payload,
         password: hashedPassword,
-        phone,
-        address
+
     })
     return user
 }
@@ -37,7 +34,7 @@ const getAllUsers = async () => {
     }
 }
 
-const updateUser = async (userId:string, payload:Partial<IUser>) => {
+const updateUser = async (userId: string, payload: Partial<IUser>) => {
     const users = await User.find({})
     const totalUsers = await User.countDocuments();
     return {

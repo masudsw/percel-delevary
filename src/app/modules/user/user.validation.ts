@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { UserType } from "./user.interface";
 
 export const createUserZodSchema = z.object({
   name: z
@@ -7,6 +8,13 @@ export const createUserZodSchema = z.object({
     .min(2, { message: "Name must be at least 2 characters long." })
     .max(50, { message: "Name must not exceed 50 characters." })
     .trim(),
+  userType: z.string()
+    .refine(
+      val => Object.values(UserType).includes(val as UserType),
+      {
+        message: `Invalid user type. Valid options: ${Object.values(UserType).join(", ")}`
+      }
+    ),
 
   email: z
     .string({ message: "Email must be a string" })
@@ -31,18 +39,18 @@ export const createUserZodSchema = z.object({
       /[!@#$%^&*(),.?":{}|<>]/,
       "Password must contain at least one special character"
     ),
-    address:z
-    .string({message:"Address must be string"})
-    .min(5,"Please give us your complete address"),
-    
+  address: z
+    .string({ message: "Address must be string" })
+    .min(5, "Please give us your complete address"),
+
 
   phone: z
     .string({ message: "Phone number must be a string" })
     .min(1, "Phone number is required")  // Required validation
     .trim()
 
-    .regex(/^(?:\+?88|0088)?01[3-9]\d{8}$/,{
-        message: "Must be a valid Bangladeshi phone number (01XXXXXXXXX format)"
-      })
-    
+    .regex(/^(?:\+?88|0088)?01[3-9]\d{8}$/, {
+      message: "Must be a valid Bangladeshi phone number (01XXXXXXXXX format)"
+    })
+
 });

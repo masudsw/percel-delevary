@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { IAddressFormat, IDimentions, IParcel, STATUS } from "./parcel.interface";
+import { IAddressFormat, IDimentions, IParcel, IStatusLog, STATUS } from "./parcel.interface";
 const addressSchema = new Schema<IAddressFormat>({
     address: { type: String, required: true },
     district: { type: String, required: true },
@@ -10,6 +10,26 @@ const dimensionSchema = new Schema<IDimentions>({
     width: { type: Number, required: true },
     length: { type: Number, required: true }
 },{_id:false})
+const statusLogSchema = new Schema<IStatusLog>({
+    status: { 
+        type: String, 
+        enum: Object.values(STATUS), 
+        required: true 
+    },
+    timestamp: { 
+        type: Date, 
+        required: true,
+        default: Date.now 
+    },
+    location: { 
+        type: String, 
+        required: true 
+    },
+    notes: { 
+        type: String, 
+        required: true 
+    }
+}, { _id: false });
 
 const parcelSchema = new Schema<IParcel>({
     trackingId: { type: String, unique: true, required: true },
@@ -32,6 +52,10 @@ const parcelSchema = new Schema<IParcel>({
         type: dimensionSchema,
         required: true
     },
+    statusLogs: {
+        type: [statusLogSchema], 
+        default: [] 
+    },
     description: {
         type: String,
         required: true
@@ -42,6 +66,7 @@ const parcelSchema = new Schema<IParcel>({
     estimatedDeliveryDate: {
         type: Date
     },
+
     currentStatus: {
         type: String,
         enum: Object.values(STATUS),

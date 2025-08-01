@@ -4,10 +4,11 @@ import httpStatus from "http-status-codes"
 import bcrypt from "bcryptjs"
 import { createUserToken } from "../../utils/userToken";
 import AppError from "../../errorHelpers/AppError";
+import { toUpperCase } from "zod";
 
 
 const login=async(payload:Partial<IUser>)=>{
-    const {email,password}=payload;
+    const {email,password,userType}=payload;
     const isUserExist=await User.findOne({email})
     if(!isUserExist){
         throw new AppError(httpStatus.BAD_REQUEST, "Email does not exist")
@@ -15,6 +16,9 @@ const login=async(payload:Partial<IUser>)=>{
     const isPasswordMatched=await bcrypt.compare(password as string, isUserExist.password as string)
     if(!isPasswordMatched){
         throw new AppError(httpStatus.BAD_REQUEST,"Incorrect password")
+    }
+    if(isUserExist.userType!==userType){
+        throw new AppError(httpStatus.FORBIDDEN,"You are not authorized")
     }
     const userToken=createUserToken(isUserExist)
     const {password:pass, ...rest}=isUserExist

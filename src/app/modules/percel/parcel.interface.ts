@@ -28,7 +28,8 @@ export enum STATUS{
 export interface IParcel{
     trackingId:string,
     sender:Types.ObjectId;
-    receiver:Types.ObjectId;
+    receiverName:string;
+    receiverPhone:string;
     originAddress:IAddressFormat;
     destinationAddress:IAddressFormat;
     description:string,
