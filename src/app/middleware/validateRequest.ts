@@ -6,7 +6,6 @@ export const valiateRequest=(ZodSchema:ZodObject)=>async(req:Request,res:Respons
         req.body=await ZodSchema.parseAsync(req.body)
         next()
         
-
     }catch(error){
         next(error)
     }

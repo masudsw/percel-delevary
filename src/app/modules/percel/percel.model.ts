@@ -52,6 +52,9 @@ const parcelSchema = new Schema<IParcel>({
         type: dimensionSchema,
         required: true
     },
+    weight:{
+        type:Number, required:true
+    },
     statusLogs: {
         type: [statusLogSchema], 
         default: [] 

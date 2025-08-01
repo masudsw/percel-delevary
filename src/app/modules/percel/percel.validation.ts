@@ -68,6 +68,10 @@ export const createParcelZodSchema = z.object({
         .min(1, "Description is required")
         .min(10, "Description must be at least 10 characters long")
         .max(500, "Description must not exceed 500 characters"),
+    weight: z
+        .number()
+        .min(0.1, "Width must be at least 0.1")
+        .max(20, "Width must not exceed 200"),
 
     currentStatus: z
         // .enum(["REQUESTED", "PICKED_UP", "IN_TRANSIT", "DELIVERED", "CANCELLED"])
@@ -112,7 +116,7 @@ export const adminUpdateParcelZodSchema = z.object({
 
 export const parcelTarckingZodSchema = z.object({
     trackingId: z.string()
-        .length(16, "Tracking ID must be exactly 16 characters") 
+        .length(16, "Tracking ID must be exactly 16 characters")
         .regex(
             /^TRK-[A-Z0-9]{12}$/, // Format: TRK- + 12 alphanums
             "Format: TRK- followed by 12 uppercase letters/numbers"

@@ -23,6 +23,23 @@ const createParcel = async (payload: Partial<IParcel>) => {
         location: payload.originAddress?.district || 'Unknown',
         notes: 'Parcel created'
     }];
+    const { receiverPhone, originAddress, destinationAddress, weight } = payload
+    // 1. Validate required fields (avoid 'undefined' errors)
+    
+  if (!receiverPhone || !originAddress || !destinationAddress || weight == null) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Missing required fields!" );
+  }
+    const existingParcel = await Parcel.findOne({
+    receiverPhone,
+    "originAddress.address": originAddress.address,
+    "destinationAddress.address": destinationAddress.address,
+    weight,
+  });
+ 
+
+  if (existingParcel) {
+    throw new AppError(httpStatus.CONFLICT,"Duplicate parcel entry detected!" );
+  }
 
     const newPayload = {
         ...payload,
@@ -32,7 +49,7 @@ const createParcel = async (payload: Partial<IParcel>) => {
         shippingFee: undefined,
         estimatedDeliveryDate: undefined
     };
-    console.log(newPayload)
+    console.log("new payload------------------",newPayload)
 
     const percel = await Parcel.create(newPayload)
     return percel
