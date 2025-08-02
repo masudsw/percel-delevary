@@ -5,11 +5,15 @@ import dotenv from 'dotenv';
 import { app } from './app';
 
 dotenv.config(); // Load environment variables from .env
+console.log(dotenv.config())
 
 
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.DB_URI || 'mongodb://127.0.0.1:27017/mydatabase';
-
+const MONGODB_URI = process.env.DB_URL 
+// || 'mongodb+srv://mongodb:mongodb@cluster0.tatfmly.mongodb.net/ParcelDeliveryDB?retryWrites=true&w=majority&appName=Cluster0';
+if(!MONGODB_URI){
+    throw new Error("db url not found in environment variable")
+}
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI)
     .then(() => console.log('MongoDB connected'))
