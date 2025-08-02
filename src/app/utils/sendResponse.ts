@@ -1,5 +1,4 @@
 import { Response } from "express";
-import { success } from "zod";
 
 interface IMeta{
     total:number;

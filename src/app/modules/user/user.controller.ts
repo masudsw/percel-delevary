@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import httpStatus from "http-status-codes"
@@ -7,9 +8,7 @@ import { sendResponse } from "../../utils/sendResponse";
 
 const createUser=catchAsync(
     async(req:Request,res:Response,next:NextFunction)=>{
-        console.log(req.body)
         const user=await UserServices.createUser(req.body)
-        
         sendResponse(res,{
             success:true,
             statusCode:httpStatus.CREATED,

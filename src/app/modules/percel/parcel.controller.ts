@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { Request, Response, NextFunction } from "express";
@@ -68,7 +69,6 @@ const deliverParcel = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         const decodeToken = req.user as JwtPayload;
         const { trackingId } = req.params;
-        console.log(req.body)
         const { phoneNumber } = req.body;
         try {
             const result = await ParcelServices.deliverParcel(trackingId, phoneNumber,decodeToken.userId)

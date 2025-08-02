@@ -12,7 +12,6 @@ export const validateStatusTransition = (
   user: IUser
 ) => {
   const lastStatus = parcel.statusLogs.slice(-1)[0]?.status as Status || undefined;
-  console.log("parcel",parcel)
 
   // Block ALL duplicate statuses (even for admins)
   if (lastStatus === newStatus) {

@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/*eslint-disable  @typescript-eslint/no-explicit-any */ 
+
 import { NextFunction, Request, Response } from "express";
 import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
@@ -15,7 +18,7 @@ export const globalErrorHandler = (
   let statusCode = 500;
   let message = "Something went wrong!!";
   let errorSources: IErrorSources[] = [];
-  let stack = envVars.NODE_ENV === "development" ? err.stack : undefined;
+  const stack = envVars.NODE_ENV === "development" ? err.stack : undefined;
 
   // Development logging
   if (envVars.NODE_ENV === "development") {

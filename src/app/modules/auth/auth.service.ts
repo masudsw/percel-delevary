@@ -4,8 +4,6 @@ import httpStatus from "http-status-codes"
 import bcrypt from "bcryptjs"
 import { createUserToken } from "../../utils/userToken";
 import AppError from "../../errorHelpers/AppError";
-import { toUpperCase } from "zod";
-
 
 const login=async(payload:Partial<IUser>)=>{
     const {email,password,userType}=payload;
@@ -21,7 +19,8 @@ const login=async(payload:Partial<IUser>)=>{
         throw new AppError(httpStatus.FORBIDDEN,"You are not authorized")
     }
     const userToken=createUserToken(isUserExist)
-    const {password:pass, ...rest}=isUserExist
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    const {password:_pass, ...rest}=isUserExist
     return{
         accssToken:userToken,
         user:rest

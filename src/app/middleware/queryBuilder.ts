@@ -1,13 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextFunction, Request, Response } from "express";
 import { FilterQuery, Model } from "mongoose";
-
 
 export const queryBuilder =
     <T>(model: Model<T>, searchableFields: (keyof T)[]) => {
         return async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const queryParams = { ...req.query }
-                let mongoQuery: FilterQuery<T> = {};
+                const mongoQuery: FilterQuery<T> = {};
                 //search
                 const searchTerm = queryParams.searchTerm as string;
                 if (searchTerm) {
@@ -27,6 +27,8 @@ export const queryBuilder =
                     'minCost',
                     'maxCost'
                 ];
+                /* eslint-disable @typescript-eslint/no-dynamic-delete */
+                 
                 excludeFields.forEach((field) => delete queryParams[field]);
                 for (const key in queryParams) {
                     const value = queryParams[key];

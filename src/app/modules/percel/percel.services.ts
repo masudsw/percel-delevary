@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+
 import AppError from "../../errorHelpers/AppError";
 import { User } from "../user/user.model";
 import { IAddressFormat, IParcel, IStatusLog, STATUS } from "./parcel.interface";
@@ -55,7 +55,6 @@ const createParcel = async (userId: string, payload: Partial<IParcel>) => {
         shippingFee: undefined,
         estimatedDeliveryDate: undefined
     };
-    console.log("new payload------------------", newPayload)
 
     const percel = await Parcel.create(newPayload)
     return percel

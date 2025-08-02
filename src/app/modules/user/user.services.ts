@@ -16,7 +16,7 @@ const createUser = async (payload: Partial<IUser>) => {
     const user = await User.create({
         ...payload,
         password: hashedPassword,
-        isBlocked:false
+        isBlocked: false
 
     })
     return user
@@ -36,21 +36,25 @@ const getAllUsers = async () => {
 }
 
 const updateUser = async (userId: string, payload: Partial<IUser>) => {
-    const users = await User.find({})
-    const totalUsers = await User.countDocuments();
-    return {
-        data: users,
-        meta: {
-            total: totalUsers
+    const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        payload,
+        {
+            new: true, 
+            runValidators: true 
         }
+    );
+    if (!updatedUser) {
+        throw new Error('User not found');
     }
+
 }
-const userBlockUpdate=async(email:string)=>{
-    const user=await User.findOne({email})
-    if(!user){
-        throw new AppError(httpStatus.BAD_REQUEST,"User not found")
+const userBlockUpdate = async (email: string) => {
+    const user = await User.findOne({ email })
+    if (!user) {
+        throw new AppError(httpStatus.BAD_REQUEST, "User not found")
     }
-    user.isBlocked=!user.isBlocked
+    user.isBlocked = !user.isBlocked
     user.save()
     return user
 }

@@ -1,7 +1,7 @@
-import express from 'express';
+
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import cors from 'cors';
+
 import { app } from './app';
 
 dotenv.config(); // Load environment variables from .env

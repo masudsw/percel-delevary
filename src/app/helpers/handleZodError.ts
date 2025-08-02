@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ZodError } from "zod";
 import { IErrorSources, IGenericErrorResponse } from "../inerfaces/error.types";
 

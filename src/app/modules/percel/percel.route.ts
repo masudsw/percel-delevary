@@ -4,7 +4,7 @@ import { valiateRequest } from "../../middleware/validateRequest"
 import { ParcelController } from "./parcel.controller"
 import { checkAuth } from "../../middleware/checkAuth"
 import { UserType } from "../user/user.interface"
-import { adminUpdateParcelZodSchema, createParcelZodSchema, parcelTarckingZodSchema } from "./percel.validation"
+import { adminUpdateParcelZodSchema, createParcelZodSchema } from "./percel.validation"
 import { Parcel } from "./percel.model"
 import { queryBuilder } from "../../middleware/queryBuilder"
 
