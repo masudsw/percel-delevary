@@ -1,9 +1,9 @@
+import { ZodError } from "zod";
 import { IErrorSources, IGenericErrorResponse } from "../inerfaces/error.types";
 
 
-export const handleZodError=(err:any):IGenericErrorResponse=>{
+export const handleZodError=(err:ZodError):IGenericErrorResponse=>{
     const errorSources:IErrorSources[]=[]
-
     err.issues.forEach((issue:any)=>{
         errorSources.push({
             path:issue.path[issue.path.length-1],
@@ -12,7 +12,7 @@ export const handleZodError=(err:any):IGenericErrorResponse=>{
     })
     return{
         statusCode:400,
-        message:"Zod error",
+        message:"Zod validation error",
         errorSources
     }
 }
