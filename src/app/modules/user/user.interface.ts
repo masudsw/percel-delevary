@@ -13,4 +13,5 @@ export interface IUser {
     password: string;
     phone: string;
     address: string;
+    isBlocked:boolean;
 }

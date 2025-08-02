@@ -21,6 +21,9 @@ export const checkAuth = (...authUsers: string[]) => async (req: Request, res: R
         if (!isUserExist) {
             throw new AppError(httpStatus.BAD_REQUEST, "User does not exist")
         }
+        if(isUserExist.isBlocked){
+            throw new AppError(httpStatus.FORBIDDEN,"You can not make any request")
+        }
         if (!authUsers.includes(verifiedToken.userType)){
             throw new AppError(httpStatus.FORBIDDEN,"you are not permitted to view this route!!!")
         }

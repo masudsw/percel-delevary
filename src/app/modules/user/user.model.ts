@@ -14,6 +14,10 @@ const userSchema = new Schema<IUser>({
         type: String,
         required: true
     },
+    isBlocked:{
+        type:Boolean,
+        default:false
+    },
     address: {
         type: String,
         required: true

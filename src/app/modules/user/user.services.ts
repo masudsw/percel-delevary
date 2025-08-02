@@ -16,6 +16,7 @@ const createUser = async (payload: Partial<IUser>) => {
     const user = await User.create({
         ...payload,
         password: hashedPassword,
+        isBlocked:false
 
     })
     return user
@@ -44,11 +45,21 @@ const updateUser = async (userId: string, payload: Partial<IUser>) => {
         }
     }
 }
+const userBlockUpdate=async(email:string)=>{
+    const user=await User.findOne({email})
+    if(!user){
+        throw new AppError(httpStatus.BAD_REQUEST,"User not found")
+    }
+    user.isBlocked=!user.isBlocked
+    user.save()
+    return user
+}
 
 
 
 export const UserServices = {
     createUser,
     getAllUsers,
-    updateUser
+    updateUser,
+    userBlockUpdate
 }

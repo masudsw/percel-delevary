@@ -51,6 +51,9 @@ export const createUserZodSchema = z.object({
 
     .regex(/^(?:\+?88|0088)?01[3-9]\d{8}$/, {
       message: "Must be a valid Bangladeshi phone number (01XXXXXXXXX format)"
-    })
+    }),
+    isBlocked:z
+    .boolean({message:"isBlocked must be a boolen value"})
+    .default(false)
 
 });

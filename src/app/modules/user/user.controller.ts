@@ -44,10 +44,22 @@ const updateUser=catchAsync(
         })
     }
 )
+const userBlockUpdate=catchAsync(
+    async(req:Request,res:Response,next:NextFunction)=>{
+        const {email}=req.params;
+     const user=await UserServices.userBlockUpdate(email)
+        sendResponse(res,{
+            success:true,
+            statusCode:httpStatus.ACCEPTED,
+            message:"Users block updated ",
+            data:user
+        })
+    })
 
 
 export const UserController={
     createUser,
     getAllUsers,
-    updateUser
+    updateUser,
+    userBlockUpdate
 }

@@ -13,24 +13,35 @@ router.post("/newparcel",
     valiateRequest(createParcelZodSchema),
     checkAuth(UserType.SENDER),
     ParcelController.createParcel)
+router.get(
+    '/',
+    checkAuth(UserType.ADMIN),
+    queryBuilder(Parcel, ['receiverName', 'description']),
+    ParcelController.getAllParcel
+);
+router.get(
+    '/:id',
+    checkAuth(UserType.SENDER),
+    ParcelController.getMyPercels  
+)
+router.patch(
+    '/:trackingId/status/cancel',
+    checkAuth(UserType.SENDER,UserType.ADMIN),
+    ParcelController.cancelParcel
+);
 router.patch(
     '/:trackingId/status/intransit',
     checkAuth(UserType.ADMIN),
     ParcelController.inTransitParcel
 );
-console.log("Passing role to checkAuth:", UserType.RECEIVER); // Should log "RECEIVER"
-router.patch(
-  '/:trackingId/status/mark-received',
-  checkAuth(UserType.RECEIVER),
-  ParcelController.markAsReceived
-);
+
 router.patch(
     '/:trackingId/status/mark-received',
     checkAuth(UserType.RECEIVER),
-    ParcelController.markAsReceived
+    ParcelController.deliverParcel
 );
 router.patch(
-    '/:trackingId',
+    '/:trackingId/status/mark-picked',
     valiateRequest(adminUpdateParcelZodSchema),
     checkAuth(UserType.ADMIN),
     ParcelController.pickParcel
@@ -40,11 +51,6 @@ router.get(
     // valiateRequest(parcelTarckingZodSchema),
     ParcelController.parcelStatus
 )
-router.get(
-    '/',
-    checkAuth(UserType.ADMIN),
-    queryBuilder(Parcel,['receiverName','description']),
-    ParcelController.getAllParcel
-)
+
 
 export const ParcelRouter = router

@@ -8,15 +8,12 @@ import AppError from "../../errorHelpers/AppError";
 
 const createParcel = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
-
         const decodeToken = req.user as JwtPayload;
-
-        // Add sender ID from the authenticated user
         const parcelData = {
             ...req.body,
-            sender: decodeToken.userId // Assuming your JWT payload has userId
+            sender: decodeToken.userId 
         };
-        const parcel = await ParcelServices.createParcel(parcelData);
+        const parcel = await ParcelServices.createParcel(decodeToken.userId, parcelData);
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.CREATED,
@@ -32,7 +29,7 @@ const getMyPercels = catchAsync(
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.CREATED,
-            message: "Parcel created successfully",
+            message: "Parcel retrieved successfully",
             data: parcels
         });
     }
@@ -48,15 +45,17 @@ const getAllParcel = catchAsync(
             success: true,
             statusCode: httpStatus.OK,
             message: "Parcels retrieved successfully",
-            data: results
+            data: results,
+            meta:meta
         });
 
     });
 
 const cancelParcel = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
-        const { trackingId } = req.body
-        const parcel = await ParcelServices.cancelParcel(trackingId)
+        const decodeToken = req.user as JwtPayload;
+        const { trackingId } = req.params
+        const parcel = await ParcelServices.cancelParcel(trackingId,decodeToken.userId)
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.OK,
@@ -65,13 +64,14 @@ const cancelParcel = catchAsync(
         });
     });
 
-const markAsReceived = catchAsync(
+const deliverParcel = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
+        const decodeToken = req.user as JwtPayload;
         const { trackingId } = req.params;
         console.log(req.body)
         const { phoneNumber } = req.body;
         try {
-            const result = await ParcelServices.markAsReceived(trackingId, phoneNumber)
+            const result = await ParcelServices.deliverParcel(trackingId, phoneNumber,decodeToken.userId)
             sendResponse(res, {
                 success: true,
                 statusCode: httpStatus.OK,
@@ -79,7 +79,6 @@ const markAsReceived = catchAsync(
                 data: result
             });
         } catch (error) {
-            // 3. Let catchAsync pass errors to globalErrorHandler
             next(error);
         }
 
@@ -142,7 +141,7 @@ export const ParcelController = {
     cancelParcel,
     getAllParcel,
     getMyPercels,
-    markAsReceived,
+    deliverParcel,
     pickParcel,
     inTransitParcel,
     parcelStatus

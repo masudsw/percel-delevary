@@ -4,7 +4,8 @@ import { User } from "../user/user.model";
 import { IAddressFormat, IParcel, IStatusLog, STATUS } from "./parcel.interface";
 import { Parcel } from "./percel.model";
 import httpStatus from "http-status-codes"
-import { Response} from "express";
+import { Response } from "express";
+import { validateStatusTransition } from "../../utils/percelStateCheck";
 
 const generateUniqueTrackingId = () => {
     const now = new Date();
@@ -16,7 +17,11 @@ const generateUniqueTrackingId = () => {
     return `TRK-${datePart}-${randomPart}`
 }
 
-const createParcel = async (payload: Partial<IParcel>) => {
+const createParcel = async (userId: string, payload: Partial<IParcel>) => {
+    const isUserExist = await User.findById({ _id: userId })
+    if (isUserExist?.isBlocked) {
+        throw new AppError(httpStatus.FORBIDDEN, "Sorry you are blocked. Contact with support to request for sending parcel")
+    }
     const trackingId = generateUniqueTrackingId();
     const statusLogs: IStatusLog[] = [{
         status: STATUS.REQUESTED,
@@ -26,21 +31,21 @@ const createParcel = async (payload: Partial<IParcel>) => {
     }];
     const { receiverPhone, originAddress, destinationAddress, weight } = payload
     // 1. Validate required fields (avoid 'undefined' errors)
-    
-  if (!receiverPhone || !originAddress || !destinationAddress || weight == null) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Missing required fields!" );
-  }
-    const existingParcel = await Parcel.findOne({
-    receiverPhone,
-    "originAddress.address": originAddress.address,
-    "destinationAddress.address": destinationAddress.address,
-    weight,
-  });
- 
 
-  if (existingParcel) {
-    throw new AppError(httpStatus.CONFLICT,"Duplicate parcel entry detected!" );
-  }
+    if (!receiverPhone || !originAddress || !destinationAddress || weight == null) {
+        throw new AppError(httpStatus.BAD_REQUEST, "Missing required fields!");
+    }
+    const existingParcel = await Parcel.findOne({
+        receiverPhone,
+        "originAddress.address": originAddress.address,
+        "destinationAddress.address": destinationAddress.address,
+        weight,
+    });
+
+
+    if (existingParcel) {
+        throw new AppError(httpStatus.CONFLICT, "Duplicate parcel entry detected!");
+    }
 
     const newPayload = {
         ...payload,
@@ -50,25 +55,176 @@ const createParcel = async (payload: Partial<IParcel>) => {
         shippingFee: undefined,
         estimatedDeliveryDate: undefined
     };
-    console.log("new payload------------------",newPayload)
+    console.log("new payload------------------", newPayload)
 
     const percel = await Parcel.create(newPayload)
     return percel
 }
 
-const getAllParcel = async (res:Response) => {
-   const {results,meta}=res.locals.data;
-   return{
-    results,
-    meta
-   }
+const getAllParcel = async (res: Response) => {
+    const { results, meta } = res.locals.data;
+    return {
+        results,
+        meta
+    }
 }
 const getMyParcels = async (userId: string) => {
-    const percels = await Parcel.find({ userId }).sort({ createdAt: -1 })
+    const percels = await Parcel.find({ sender: userId }).sort({ createdAt: -1 })
     return percels
 }
+const pickParcel = async (
+    updateData: {
+        trackingId: string;
+        receiverName?: string;
+        receiverPhone?: string;
+        destinationAddress?: IAddressFormat;
+        estimatedDeliveryDate?: Date;
+        weight?: number;
+        shippingFee: number;
+        notes: string;
+    },
+    userId: string
+) => {
+    const { trackingId, shippingFee, notes, estimatedDeliveryDate, ...updates } = updateData;
 
-const cancelParcel = async (trackingId: string) => {
+    
+    const [parcel, user] = await Promise.all([
+        Parcel.findOne({ trackingId }),
+        User.findById(userId)
+    ]);
+
+    
+    if (!parcel) {
+        throw new AppError(httpStatus.NOT_FOUND, "Parcel not found");
+    }
+    if (!user) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "User not found");
+    }
+
+    
+    validateStatusTransition(
+        parcel,
+        STATUS.PICKED,  
+        user            
+    );
+
+
+    const statusUpdate = {
+        status: STATUS.PICKED,
+        timestamp: new Date(),
+        location: parcel.originAddress?.district || 'Unknown', // Typically picked from origin
+        notes: `Picked by ${user.name} (${user.userType}): ${notes}`,
+    };
+
+    
+    const updatedParcel = await Parcel.findOneAndUpdate(
+        { trackingId },
+        {
+            ...updates,
+            shippingFee,
+            estimatedDeliveryDate,
+            currentStatus: STATUS.PICKED,
+            $push: { statusLogs: statusUpdate }
+        },
+        { 
+            new: true, 
+            runValidators: true 
+        }
+    );
+
+    return updatedParcel;
+};
+
+const inTransitParcel = async (trackingId: string, userId: string) => {
+    const [parcel, user] = await Promise.all([
+        Parcel.findOne({ trackingId }),
+        User.findById(userId)
+    ]);
+
+    if (!parcel) {
+        throw new AppError(httpStatus.NOT_FOUND, "Parcel not found");
+    }
+    if (!user) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "User not found");
+    }
+
+    
+    validateStatusTransition(
+        parcel,
+        STATUS.IN_TRANSIT, 
+        user              
+    );
+
+    // Prepare status log entry
+    const statusUpdate = {
+        status: STATUS.IN_TRANSIT,
+        timestamp: new Date(),
+        location: parcel.destinationAddress?.district || "Unknown",
+        notes: `Marked in-transit by ${user.name} (${user.userType === "ADMIN" ? "Admin" : "User"})`
+    };
+
+    // Single atomic update operation
+    const updatedParcel = await Parcel.findOneAndUpdate(
+        { trackingId },
+        {
+            currentStatus: STATUS.IN_TRANSIT,
+            $push: { statusLogs: statusUpdate }
+        },
+        { new: true, runValidators: true }
+    );
+
+    return updatedParcel;
+};
+
+const deliverParcel = async (trackingId: string, receiverPhone: string, userId?: string) => {
+    const [parcel, user] = await Promise.all([
+        Parcel.findOne({ trackingId }),
+        User.findById(userId)
+    ]);
+
+    if (!parcel) {
+        throw new AppError(httpStatus.NOT_FOUND, "Parcel not found");
+    }
+
+    if (parcel.receiverPhone !== receiverPhone) {
+        throw new AppError(httpStatus.FORBIDDEN, "You are not authorized to receive this parcel");
+    }
+
+    if(!user){
+        throw new AppError(httpStatus.BAD_REQUEST,"User not found")
+    }
+    validateStatusTransition(
+        parcel,
+        STATUS.DELIVERED,
+        user
+    );
+
+    const statusUpdate = {
+        status: STATUS.DELIVERED,
+        timestamp: new Date(),
+        location: parcel.destinationAddress?.district || 'Unknown',
+        notes: userId 
+            ? `Delivered by ${user?.name} (${user?.userType}) to ${receiverPhone}`
+            : `Received by customer (${receiverPhone})`
+    };
+
+    // Atomic update operation
+    const updatedParcel = await Parcel.findOneAndUpdate(
+        { trackingId },
+        {
+            currentStatus: STATUS.DELIVERED,
+            $push: { statusLogs: statusUpdate },
+            deliveredAt: new Date() // Add delivery timestamp
+        },
+        { 
+            new: true,
+            runValidators: true 
+        }
+    );
+
+    return updatedParcel;
+};
+const cancelParcel = async (trackingId: string, userId: string) => {
 
     const parcel = await Parcel.findOne({ trackingId })
     if (!parcel) {
@@ -77,109 +233,16 @@ const cancelParcel = async (trackingId: string) => {
     if (parcel.currentStatus === STATUS.CANCELLED) {
         throw new AppError(httpStatus.BAD_REQUEST, "Percel is already cancelled");
     }
-    if (parcel.currentStatus === STATUS.DELIVERED) {
-        throw new AppError(httpStatus.BAD_REQUEST, "Percel is already delivered");
+    const isUserExist = await User.findById({ _id: userId })
+    if (!isUserExist) {
+        throw new AppError(httpStatus.FORBIDDEN, "You are not authoried");
     }
-    return parcel
-}
-// const undateParcel = async (trackingId: string) => {
-//     const parcel = await Parcel.findOne({ trackingId })
-//     return parcel
-// }
-const inTransitParcel = async (trackingId: string, userId: string) => {
-    const parcel = await Parcel.findOne({ trackingId })
-    const user= await User.findById({_id:userId})
-    if (!parcel) {
-        throw new AppError(httpStatus.BAD_REQUEST, "Incorrect tarckingId")
+    if (parcel.currentStatus !== STATUS.REQUESTED) {
+        throw new AppError(httpStatus.BAD_REQUEST, `Sorry, the percel is already ${parcel.currentStatus}`)
     }
-    if (parcel.currentStatus === STATUS.IN_TRANSIT) {
-        throw new AppError(httpStatus.BAD_REQUEST, "Parcel is already marked as In-Transit")
-    }
-    parcel.currentStatus = STATUS.IN_TRANSIT
-
-    parcel.statusLogs.push({
-        status: STATUS.IN_TRANSIT,
-        timestamp: new Date(),
-        location: parcel.destinationAddress?.district || 'Unknown',
-        notes: `Undated by ${user?.name}`
-    })
+    parcel.currentStatus = STATUS.CANCELLED
     parcel.save();
     return parcel
-
-}
-
-const markAsReceived = async (trackingId: string, receiverPhone: string) => {
-    const parcel = await Parcel.findOne({ trackingId })
-    if (!parcel) {
-        throw new AppError(httpStatus.BAD_REQUEST, "Incorrect tarckingId")
-    }
-    if (parcel.receiverPhone != receiverPhone) {
-        throw new AppError(httpStatus.FORBIDDEN, "You are not authoried to receive")
-    }
-    if (parcel.currentStatus === STATUS.DELIVERED) {
-        throw new AppError(httpStatus.FORBIDDEN, "Parcel is already marked as received")
-    }
-    parcel.currentStatus = STATUS.DELIVERED
-    parcel.statusLogs.push({
-        status: STATUS.DELIVERED,
-        timestamp: new Date(),
-        location: parcel.destinationAddress?.district || 'Unknown',
-        notes: `Received by ${parcel.receiverPhone}`
-    })
-    parcel.save();
-    return parcel
-
-}
-
-const pickParcel = async (
-    updateData: {
-        trackingId: string;
-        receiverName?: string;
-        receiverPhone?: string;
-        destinationAddress?: IAddressFormat;
-        estimatedDeliveryDate?: Date,
-        weight?: number;
-        shippingFee: number,
-        notes: string;
-    },
-    adminId: string
-) => {
-    const { trackingId, shippingFee, notes, estimatedDeliveryDate, ...updates } = updateData;
-    if (!Types.ObjectId.isValid(adminId)) {
-        throw new AppError(httpStatus.BAD_REQUEST, "Invalid admin ID format");
-    }
-    const admin = await User.findById({ _id: adminId })
-
-    const parcel = await Parcel.findOne({ trackingId })
-    if (!parcel) {
-        throw new AppError(httpStatus.BAD_REQUEST, "Incorrect tarckingId")
-    }
-    if (parcel.currentStatus === STATUS.PICKED) {
-        throw new AppError(httpStatus.FORBIDDEN, "Parcel is already marked as picked")
-    }
-    parcel.currentStatus = STATUS.PICKED
-
-    parcel.statusLogs.push({
-        status: parcel.currentStatus,
-        timestamp: new Date(),
-        location: parcel.destinationAddress?.district || 'Unknown',
-        notes: `Undated by ${admin?.name}: ${notes}`,
-    })
-    const updatePayload: any = {
-        ...updates,
-        shippingFee,      
-        estimatedDeliveryDate, 
-        currentStatus: STATUS.PICKED,
-        statusLogs: parcel.statusLogs
-    };
-    console.log(updatePayload)
-    const updatedParcel = await Parcel.findOneAndUpdate(
-        { trackingId },
-        updatePayload,
-        { new: true }
-    );
-    return parcel
-
 }
 
 const parcelStatus = async (trackingId: string) => {
@@ -189,7 +252,7 @@ const parcelStatus = async (trackingId: string) => {
         throw new AppError(httpStatus.BAD_REQUEST, "Percel does not exists")
     }
     return parcel.statusLogs
-    
+
 }
 
 
@@ -200,6 +263,6 @@ export const ParcelServices = {
     cancelParcel,
     pickParcel,
     inTransitParcel,
-    markAsReceived,
+    deliverParcel,
     parcelStatus
 }
