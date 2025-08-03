@@ -6,6 +6,7 @@ import { Parcel } from "./percel.model";
 import httpStatus from "http-status-codes"
 import { Response } from "express";
 import { validateStatusTransition } from "../../utils/percelStateCheck";
+import mongoose from "mongoose";
 
 const generateUniqueTrackingId = () => {
     const now = new Date();
@@ -68,8 +69,17 @@ const getAllParcel = async (res: Response) => {
     }
 }
 const getMyParcels = async (userId: string) => {
-    const percels = await Parcel.find({ sender: userId }).sort({ createdAt: -1 })
-    return percels
+    if(!userId){
+        throw new AppError(httpStatus.NOT_FOUND,"User not found")
+    }
+    const senderId = new mongoose.Types.ObjectId(userId);
+    console.log("sender id",senderId)
+    console.log("inside getMyParcel id=",senderId)
+    console.log("-----------------------------")
+    const parcels = await Parcel.find({ sender: senderId }).sort({ createdAt: -1 })
+    console.log(parcels)
+    console.log("--------------------------------------")
+    return parcels
 }
 const pickParcel = async (
     updateData: {

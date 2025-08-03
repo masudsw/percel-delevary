@@ -20,6 +20,12 @@ router.get(
     ParcelController.getAllParcel
 );
 router.get(
+    '/myParcel',
+    checkAuth(UserType.SENDER),
+    ParcelController.getMyPercels
+
+)
+router.get(
     '/:id',
     checkAuth(UserType.SENDER),
     ParcelController.getMyPercels  

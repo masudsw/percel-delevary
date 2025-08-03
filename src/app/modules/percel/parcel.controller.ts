@@ -29,7 +29,7 @@ const getMyPercels = catchAsync(
         const parcels = await ParcelServices.getMyParcels(decodeToken.userId);
         sendResponse(res, {
             success: true,
-            statusCode: httpStatus.CREATED,
+            statusCode: httpStatus.OK,
             message: "Parcel retrieved successfully",
             data: parcels
         });
