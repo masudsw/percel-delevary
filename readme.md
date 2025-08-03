@@ -80,7 +80,9 @@ Authentication
 
 ```mermaid
 stateDiagram-v2
-    direction LR
+
+    direction TB
+   
     [*] --> REQUESTED
     REQUESTED --> PICKED: 🛠️ Admin action
     PICKED --> IN_TRANSIT: 🚚 Admin action
