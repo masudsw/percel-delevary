@@ -41,7 +41,7 @@ cp .env.example .env
 
 # Windows users (PowerShell):
 Copy-Item .env.example .env
-
+```
 Environment Variables
 
 Create .env file with:
