@@ -20,10 +20,21 @@ const login=async(payload:Partial<IUser>)=>{
     }
     const userToken=createUserToken(isUserExist)
     /* eslint-disable @typescript-eslint/no-unused-vars */
-    const {password:_pass, ...rest}=isUserExist
+    // const {password:_pass, ...rest}=isUserExist
+    const userObject = isUserExist.toObject();
+    
+    const cleanUser = {
+        id: userObject._id,
+        name: userObject.name,
+        email: userObject.email,
+        userType: userObject.userType,
+        phone: userObject.phone,
+        address: userObject.address,
+        
+    };
     return{
         accssToken:userToken,
-        user:rest
+        user:cleanUser
     }
 }
 export const AuthServices={

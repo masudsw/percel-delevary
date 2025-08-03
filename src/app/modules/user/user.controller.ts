@@ -20,12 +20,12 @@ const createUser = catchAsync(
 const getAllUsers = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
 
-        const user = await UserServices.getAllUsers()
+        const loginInfo = await UserServices.getAllUsers()
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.ACCEPTED,
             message: "All users retrieved successfully",
-            data: user
+            data: loginInfo
         })
     }
 )
