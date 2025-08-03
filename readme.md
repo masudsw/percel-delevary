@@ -145,5 +145,10 @@ We welcome contributions! Here's how to get started:
 **Pro Tips**:
 - 🔍 Before contributing, check open [Issues](https://github.com/masudsw/percel-delevary/issues)
 - ✅ Ensure tests pass (`npm test`)
+
+
+## 🚀 Let's Connect  
+- LinkedIn: [Let's chat!](https://www.linkedin.com/in/golam-mustafa-masud)  
+- GitHub: [@masudsw](https://github.com/masudsw)
 - 📝 Update documentation if needed
 - ✨ Keep commits atomic and well-described
