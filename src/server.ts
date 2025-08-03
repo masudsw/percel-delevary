@@ -1,12 +1,8 @@
 
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-
 import { app } from './app';
-
 dotenv.config(); // Load environment variables from .env
-console.log(dotenv.config())
-
 
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.DB_URL 
@@ -18,7 +14,6 @@ if(!MONGODB_URI){
 mongoose.connect(MONGODB_URI)
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error('MongoDB connection error:', err));
-
 
 // Start the server
 app.listen(PORT, () => {
