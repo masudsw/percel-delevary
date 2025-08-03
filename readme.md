@@ -19,10 +19,12 @@ A RESTful API for parcel delivery management system with:
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/masudsw/percel-delevary)
 
 ## 🛠️ Setup Instructions
+
 Prerequisites:
--**Node.js v18+**
--**MongoDB Atlas account**
--**Git**
+
+- **Node.js v18+**
+- **MongoDB Atlas account**
+- **Git**
 
 ## 🛠️ Installation
 
@@ -39,7 +41,7 @@ cp .env.example .env
 
 # Windows users (PowerShell):
 Copy-Item .env.example .env
-
+```
 Environment Variables
 
 Create .env file with:
@@ -50,7 +52,7 @@ DB_URI=mongodb+srv://your_mongodb_connection_string
 JWT_ACCESS_SECRET=your_jwt_secret
 JWT_ACCESS_EXPIRES=1d
 BCRYPT_SALT_ROUNDS=12
-
+```
 # 🌐 API Endpoints
 Base URL
 https://parcel-delevery-backend.vercel.app/api/v1
@@ -78,21 +80,23 @@ Authentication
 
 ```mermaid
 stateDiagram-v2
-    direction LR
+
+    direction TB
+   
     [*] --> REQUESTED
     REQUESTED --> PICKED: 🛠️ Admin action
     PICKED --> IN_TRANSIT: 🚚 Admin action
     IN_TRANSIT --> DELIVERED: ✅ Receiver action
     
     %% Cancellation paths
+  
     REQUESTED --> CANCELLED: ❌ Sender/Admin
     PICKED --> CANCELLED: ❌ Admin
     IN_TRANSIT --> CANCELLED: ❌ Admin
-    
-    note right of DELIVERED: Final state
-    note left of CANCELLED: Terminal state
+```
 
-    ## 📦 Parcel Management
+
+## 📦 Parcel Management
 
 | Method   | Endpoint                                      | Description                  | 👤 Auth Level       |
 |----------|-----------------------------------------------|------------------------------|---------------------|
@@ -141,5 +145,10 @@ We welcome contributions! Here's how to get started:
 **Pro Tips**:
 - 🔍 Before contributing, check open [Issues](https://github.com/masudsw/percel-delevary/issues)
 - ✅ Ensure tests pass (`npm test`)
+
+
+## 🚀 Let's Connect  
+- LinkedIn: [Let's chat!](https://www.linkedin.com/in/golam-mustafa-masud)  
+- GitHub: [@masudsw](https://github.com/masudsw)
 - 📝 Update documentation if needed
 - ✨ Keep commits atomic and well-described
