@@ -91,11 +91,10 @@ stateDiagram-v2
     REQUESTED --> CANCELLED: ❌ Sender/Admin
     PICKED --> CANCELLED: ❌ Admin
     IN_TRANSIT --> CANCELLED: ❌ Admin
+```
 
-    note right of DELIVERED: Final state
-    note left of CANCELLED: Terminal state
 
-    ## 📦 Parcel Management
+## 📦 Parcel Management
 
 | Method   | Endpoint                                      | Description                  | 👤 Auth Level       |
 |----------|-----------------------------------------------|------------------------------|---------------------|
