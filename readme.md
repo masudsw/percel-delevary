@@ -19,10 +19,12 @@ A RESTful API for parcel delivery management system with:
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/masudsw/percel-delevary)
 
 ## 🛠️ Setup Instructions
+
 Prerequisites:
--**Node.js v18+**
--**MongoDB Atlas account**
--**Git**
+
+- **Node.js v18+**
+- **MongoDB Atlas account**
+- **Git**
 
 ## 🛠️ Installation
 
@@ -50,7 +52,7 @@ DB_URI=mongodb+srv://your_mongodb_connection_string
 JWT_ACCESS_SECRET=your_jwt_secret
 JWT_ACCESS_EXPIRES=1d
 BCRYPT_SALT_ROUNDS=12
-
+```
 # 🌐 API Endpoints
 Base URL
 https://parcel-delevery-backend.vercel.app/api/v1
@@ -85,10 +87,11 @@ stateDiagram-v2
     IN_TRANSIT --> DELIVERED: ✅ Receiver action
     
     %% Cancellation paths
+  
     REQUESTED --> CANCELLED: ❌ Sender/Admin
     PICKED --> CANCELLED: ❌ Admin
     IN_TRANSIT --> CANCELLED: ❌ Admin
-    
+
     note right of DELIVERED: Final state
     note left of CANCELLED: Terminal state
 
