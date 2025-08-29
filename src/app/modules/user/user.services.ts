@@ -22,6 +22,13 @@ const createUser = async (payload: Partial<IUser>) => {
     return user
 }
 
+const getMe=async(userId:string)=>{
+    const user=await User.findById(userId).select("-password")
+    return{
+        data:user
+    }
+}
+
 
 const getAllUsers = async () => {
 
@@ -65,5 +72,6 @@ export const UserServices = {
     createUser,
     getAllUsers,
     updateUser,
-    userBlockUpdate
+    userBlockUpdate,
+    getMe
 }

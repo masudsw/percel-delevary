@@ -11,6 +11,7 @@ router.post("/register",
 router.patch('/:email/block',
     checkAuth(UserType.ADMIN),
     UserController.userBlockUpdate)
+    router.get("/me",checkAuth(...Object.values(UserType)),UserController.getMe)
 
 
 export const UserRouter=router

@@ -1,42 +1,45 @@
-import { IUser } from "../user/user.interface";
-import { User } from "../user/user.model";
-import httpStatus from "http-status-codes"
-import bcrypt from "bcryptjs"
-import { createUserToken } from "../../utils/userToken";
-import AppError from "../../errorHelpers/AppError";
 
-const login=async(payload:Partial<IUser>)=>{
-    const {email,password,userType}=payload;
-    const isUserExist=await User.findOne({email})
-    if(!isUserExist){
-        throw new AppError(httpStatus.BAD_REQUEST, "Email does not exist")
+import  jwt  from "jsonwebtoken"
+import AppError from "../../errorHelpers/AppError"
+import { User } from "../user/user.model"
+import httpStatus from "http-status-codes"
+import { envVars } from "../../config/env"
+import { sendEmail } from "../../utils/sendEmail"
+
+
+const forgotPassword=async(email:string)=>{
+    const isUserExists=await User.findOne({email})
+    if(!isUserExists){
+        throw new AppError(httpStatus.BAD_REQUEST,"User does not exists")
     }
-    const isPasswordMatched=await bcrypt.compare(password as string, isUserExist.password as string)
-    if(!isPasswordMatched){
-        throw new AppError(httpStatus.BAD_REQUEST,"Incorrect password")
+    if(!isUserExists.isVarified){
+        throw new AppError(httpStatus.BAD_REQUEST,"User is not verified")
     }
-    if(isUserExist.userType!==userType){
-        throw new AppError(httpStatus.FORBIDDEN,"You are not authorized")
+    if(isUserExists.isBlocked){
+        throw new AppError(httpStatus.BAD_REQUEST,"User is blocked")
     }
-    const userToken=createUserToken(isUserExist)
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    // const {password:_pass, ...rest}=isUserExist
-    const userObject = isUserExist.toObject();
+    const jwtPayload={
+        userId:isUserExists._id,
+        email:isUserExists.email,
+        userType: isUserExists.userType
+    }
     
-    const cleanUser = {
-        id: userObject._id,
-        name: userObject.name,
-        email: userObject.email,
-        userType: userObject.userType,
-        phone: userObject.phone,
-        address: userObject.address,
-        
-    };
-    return{
-        accssToken:userToken,
-        user:cleanUser
-    }
+    const resetToken=jwt.sign(jwtPayload,envVars.JWT_ACCESS_SECRET,{expiresIn:"10m"})
+    const resetUILink=`${envVars.FRONTEND_URL}/reset-password?id=${isUserExists._id}&token=${resetToken}`
+    sendEmail({
+        to:isUserExists.email,
+        subject:"Password Reset",
+        templateName:"forgotPassword",
+        templateData:{
+            name:isUserExists.name,
+            resetUILink
+        }
+    })
+    
 }
-export const AuthServices={
-    login
+
+export const AuthServices = {
+    
+    forgotPassword,
+   
 }

@@ -83,8 +83,23 @@ export const createParcelZodSchema = z.object({
 });
 
 export const adminUpdateParcelZodSchema = z.object({
+    
     receiverName: z.string().min(2).max(100).optional(),
     receiverPhone: z.string().regex(/^(?:\+?88|0088)?01[3-9]\d{8}$/).optional(),
+    dimentions: z.object({
+        height: z
+            .number()
+            .min(0.1, "Height must be at least 0.1")
+            .max(200, "Height must not exceed 200"),
+        width: z
+            .number()
+            .min(0.1, "Width must be at least 0.1")
+            .max(200, "Width must not exceed 200"),
+        length: z
+            .number()
+            .min(0.1, "Length must be at least 0.1")
+            .max(200, "Length must not exceed 200")
+    }),
     destinationAddress: z.object({
         address: z.string().min(5).max(200),
         district: z.string().min(1).max(50),
@@ -99,7 +114,7 @@ export const adminUpdateParcelZodSchema = z.object({
             dateStr => new Date(dateStr) > new Date(),
             "Delivery date must be in the future"
         )
-        .transform(dateStr => new Date(dateStr)),
+        .transform(dateStr => new Date(dateStr)).optional(),
     shippingFee: z.number()
         .min(0, "Shipping fee cannot be negative")
         .max(10000, "Shipping fee cannot exceed 10,000")
@@ -110,9 +125,11 @@ export const adminUpdateParcelZodSchema = z.object({
                 return decimalPlaces <= 2;
             },
             "Shipping fee can have maximum 2 decimal places"
-        ),
+        ).optional(),
     notes: z.string().min(1, "Update notes are required") // Require admin to explain changes
-}).strict();
+}).strict().partial().extend({
+    notes:z.string().min(1,"Undat notes are required"),
+});
 
 export const parcelTarckingZodSchema = z.object({
     trackingId: z.string()

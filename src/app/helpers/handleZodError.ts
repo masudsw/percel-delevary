@@ -11,6 +11,7 @@ export const handleZodError=(err:ZodError):IGenericErrorResponse=>{
             message:issue.message
         })
     })
+    console.log(errorSources)
     return{
         statusCode:400,
         message:"Zod validation error",

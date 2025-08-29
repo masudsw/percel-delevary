@@ -12,7 +12,7 @@ const createParcel = catchAsync(
         const decodeToken = req.user as JwtPayload;
         const parcelData = {
             ...req.body,
-            sender: decodeToken.userId 
+            sender: decodeToken.userId
         };
         const parcel = await ParcelServices.createParcel(decodeToken.userId, parcelData);
         sendResponse(res, {
@@ -30,7 +30,7 @@ const getMyPercels = catchAsync(
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.OK,
-            message: "Parcel retrieved successfully",
+            message: "Parcel retrieved successfully..............",
             data: parcels
         });
     }
@@ -41,13 +41,12 @@ const getAllParcel = catchAsync(
             throw new AppError(httpStatus.NOT_FOUND, 'No parcels found');
         }
         const { results, meta } = await ParcelServices.getAllParcel(res);
-
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.OK,
             message: "Parcels retrieved successfully",
             data: results,
-            meta:meta
+            meta: meta
         });
 
     });
@@ -56,7 +55,7 @@ const cancelParcel = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         const decodeToken = req.user as JwtPayload;
         const { trackingId } = req.params
-        const parcel = await ParcelServices.cancelParcel(trackingId,decodeToken.userId)
+        const parcel = await ParcelServices.cancelParcel(trackingId, decodeToken.userId)
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.OK,
@@ -69,9 +68,10 @@ const deliverParcel = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         const decodeToken = req.user as JwtPayload;
         const { trackingId } = req.params;
-        const { phoneNumber } = req.body;
+        const { receiverPhone } = req.body;
+        console.log("phone number in controller",receiverPhone, req.body)
         try {
-            const result = await ParcelServices.deliverParcel(trackingId, phoneNumber,decodeToken.userId)
+            const result = await ParcelServices.deliverParcel(trackingId, receiverPhone, decodeToken.userId)
             sendResponse(res, {
                 success: true,
                 statusCode: httpStatus.OK,
@@ -111,6 +111,7 @@ const inTransitParcel = catchAsync(
 );
 const pickParcel = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
+        console.log("inside pickparcel controooler")
         const { trackingId } = req.params;
         const decodeToken = req.user as JwtPayload;
         const result = await ParcelServices.pickParcel({ trackingId, ...req.body }, decodeToken.userId)
@@ -134,7 +135,18 @@ const parcelStatus = catchAsync(
 
     }
 )
+const getReceiverParcel = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const result = await ParcelServices.getReceiverParcel()
+        sendResponse(res, {
+            success: true,
+            statusCode: httpStatus.OK,
+            message: "Receiver parcel retrieved successfully",
+            data: result
+        });
 
+    }
+)
 
 export const ParcelController = {
     createParcel,
@@ -144,6 +156,7 @@ export const ParcelController = {
     deliverParcel,
     pickParcel,
     inTransitParcel,
-    parcelStatus
+    parcelStatus,
+    getReceiverParcel
 
 };

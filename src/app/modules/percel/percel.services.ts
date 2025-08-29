@@ -73,12 +73,7 @@ const getMyParcels = async (userId: string) => {
         throw new AppError(httpStatus.NOT_FOUND,"User not found")
     }
     const senderId = new mongoose.Types.ObjectId(userId);
-    console.log("sender id",senderId)
-    console.log("inside getMyParcel id=",senderId)
-    console.log("-----------------------------")
     const parcels = await Parcel.find({ sender: senderId }).sort({ createdAt: -1 })
-    console.log(parcels)
-    console.log("--------------------------------------")
     return parcels
 }
 const pickParcel = async (
@@ -194,7 +189,8 @@ const deliverParcel = async (trackingId: string, receiverPhone: string, userId?:
     if (!parcel) {
         throw new AppError(httpStatus.NOT_FOUND, "Parcel not found");
     }
-
+    console.log("parcel.receiverPhone",parcel.receiverPhone)
+    console.log("receiverPhone",receiverPhone)
     if (parcel.receiverPhone !== receiverPhone) {
         throw new AppError(httpStatus.FORBIDDEN, "You are not authorized to receive this parcel");
     }
@@ -263,6 +259,13 @@ const parcelStatus = async (trackingId: string) => {
     return parcel.statusLogs
 
 }
+const getReceiverParcel=async()=>{
+    const parcels=await Parcel.find({currentStatus:STATUS.IN_TRANSIT})
+    if(!parcels){
+        throw new AppError(httpStatus.BAD_REQUEST,"Parcels does not exists")
+    }
+    return parcels
+}
 
 
 export const ParcelServices = {
@@ -273,5 +276,6 @@ export const ParcelServices = {
     pickParcel,
     inTransitParcel,
     deliverParcel,
-    parcelStatus
+    parcelStatus,
+    getReceiverParcel
 }

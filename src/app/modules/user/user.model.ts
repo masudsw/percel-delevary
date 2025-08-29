@@ -1,5 +1,12 @@
 import { model, Schema } from "mongoose";
-import { IUser, UserType } from "./user.interface";
+import { IAuthProvider, IUser, UserType } from "./user.interface";
+const authproviderSchema=new Schema<IAuthProvider>({
+    provider:{type:String, required:true},
+    providerId:{type:String,required:true}
+},{
+    versionKey:false,
+    _id:false
+})
 
 const userSchema = new Schema<IUser>({
     name: { type: String, required: true },
@@ -10,11 +17,16 @@ const userSchema = new Schema<IUser>({
         enum: Object.values(UserType),
         default: UserType.SENDER
     },
+    auths:[authproviderSchema],
     phone: {
         type: String,
         required: true
     },
     isBlocked:{
+        type:Boolean,
+        default:false
+    },
+    isVarified:{
         type:Boolean,
         default:false
     },
