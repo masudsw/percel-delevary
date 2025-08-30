@@ -189,8 +189,6 @@ const deliverParcel = async (trackingId: string, receiverPhone: string, userId?:
     if (!parcel) {
         throw new AppError(httpStatus.NOT_FOUND, "Parcel not found");
     }
-    console.log("parcel.receiverPhone",parcel.receiverPhone)
-    console.log("receiverPhone",receiverPhone)
     if (parcel.receiverPhone !== receiverPhone) {
         throw new AppError(httpStatus.FORBIDDEN, "You are not authorized to receive this parcel");
     }

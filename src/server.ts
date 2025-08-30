@@ -5,6 +5,7 @@ import { envVars } from './app/config/env';
 import { app } from './app';
 import { connectRedis } from './app/config/redis.config';
 import { seedSuperAdmin } from './app/utils/seedSuperAdmin';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 let server: Server;
 const startServer = async () => {
     try {

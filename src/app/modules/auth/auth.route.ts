@@ -4,7 +4,7 @@ import { valiateRequest } from "../../middleware/validateRequest";
 import { loginUserZodSchema } from "./auth.validation";
 import passport from "passport";
 import { envVars } from "../../config/env";
-
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 const router=Router()
 router.post('/login',
     valiateRequest(loginUserZodSchema),

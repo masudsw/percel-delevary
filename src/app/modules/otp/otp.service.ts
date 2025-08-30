@@ -1,4 +1,3 @@
-import { email } from "zod";
 import { User } from "../user/user.model";
 import AppError from "../../errorHelpers/AppError";
 import httpStatus from "http-status-codes"

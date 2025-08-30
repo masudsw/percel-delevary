@@ -48,39 +48,13 @@ router.patch(
 
 router.patch(
     '/:trackingId/status/mark-received',
-    (req,res,next)=>{
-        console.log("mark-received\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\jjhjh")
-        console.log("url",req.baseUrl)
-        console.log("body data",req.body)
-        next()
-    },
     checkAuth(UserType.RECEIVER),
-    (req,res,next)=>{
-        console.log("checkAuth passing")
-        console.log("body data",req.body)
-        next()
-    },
     ParcelController.deliverParcel
 );
 router.patch(
     '/:trackingId/status/mark-picked',
-    (req,res,next)=>{
-        // console.log('------incoming request-----------------------')
-        // console.log('Method',req.method);
-        // console.log('url:',req.originalUrl);
-        // console.log('body data',req.body)
-        next();
-    },
     valiateRequest(adminUpdateParcelZodSchema),
-    (req,res,next)=>{
-        console.log("After validaterequest. passed validatiion.")
-        next()
-    },
     checkAuth(UserType.ADMIN),
-    (req,res,next)=>{
-        console.log("After checkAuth. passed userAuthentication")
-        next()
-    },
     ParcelController.pickParcel
 );
 router.get(
