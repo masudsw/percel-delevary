@@ -33,6 +33,7 @@ passport.use(
             name: profile.displayName,
             photo: profile.photos?.[0]?.value,
             userType: UserType.SENDER,
+            isVarified:true,
             auths: [
               {
                 provider: "google",

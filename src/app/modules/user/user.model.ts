@@ -11,7 +11,7 @@ const authproviderSchema=new Schema<IAuthProvider>({
 const userSchema = new Schema<IUser>({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String },
     userType: {
         type: String,
         enum: Object.values(UserType),
@@ -20,7 +20,7 @@ const userSchema = new Schema<IUser>({
     auths:[authproviderSchema],
     phone: {
         type: String,
-        required: true
+        
     },
     isBlocked:{
         type:Boolean,
@@ -32,7 +32,7 @@ const userSchema = new Schema<IUser>({
     },
     address: {
         type: String,
-        required: true
+        
     }
 }, { timestamps: true })
 

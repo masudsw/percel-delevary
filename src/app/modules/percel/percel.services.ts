@@ -61,6 +61,46 @@ const createParcel = async (userId: string, payload: Partial<IParcel>) => {
     return percel
 }
 
+const updateParcel = async (userId: string, parcelId: string, payload: Partial<IParcel>) => {
+  // Check if the user exists and is not blocked
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "No user found");
+  }
+
+  if (user.isBlocked) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "Sorry, you are blocked. Contact support to request for sending parcel"
+    );
+  }
+  console.log("Parcel Id",parcelId)
+
+  // Find the parcel first to check its current status
+  const parcel = await Parcel.findById(parcelId);
+
+  if (!parcel) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Parcel not found");
+  }
+
+  if (parcel.currentStatus !== "REQUESTED") {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You can only update parcels with a 'REQUESTED' status."
+    );
+  }
+
+  // Update the parcel only if the status check passes
+  const updatedParcel = await Parcel.findOneAndUpdate(
+    { _id: parcelId },
+    payload,
+    { new: true }
+  );
+
+  return updatedParcel;
+};
+
 const getAllParcel = async (res: Response) => {
     const { results, meta } = res.locals.data;
     return {
@@ -69,8 +109,8 @@ const getAllParcel = async (res: Response) => {
     }
 }
 const getMyParcels = async (userId: string) => {
-    if(!userId){
-        throw new AppError(httpStatus.NOT_FOUND,"User not found")
+    if (!userId) {
+        throw new AppError(httpStatus.NOT_FOUND, "User not found")
     }
     const senderId = new mongoose.Types.ObjectId(userId);
     const parcels = await Parcel.find({ sender: senderId }).sort({ createdAt: -1 })
@@ -91,13 +131,13 @@ const pickParcel = async (
 ) => {
     const { trackingId, shippingFee, notes, estimatedDeliveryDate, ...updates } = updateData;
 
-    
+
     const [parcel, user] = await Promise.all([
         Parcel.findOne({ trackingId }),
         User.findById(userId)
     ]);
 
-    
+
     if (!parcel) {
         throw new AppError(httpStatus.NOT_FOUND, "Parcel not found");
     }
@@ -105,11 +145,11 @@ const pickParcel = async (
         throw new AppError(httpStatus.UNAUTHORIZED, "User not found");
     }
 
-    
+
     validateStatusTransition(
         parcel,
-        STATUS.PICKED,  
-        user            
+        STATUS.PICKED,
+        user
     );
 
 
@@ -120,7 +160,7 @@ const pickParcel = async (
         notes: `Picked by ${user.name} (${user.userType}): ${notes}`,
     };
 
-    
+
     const updatedParcel = await Parcel.findOneAndUpdate(
         { trackingId },
         {
@@ -130,9 +170,9 @@ const pickParcel = async (
             currentStatus: STATUS.PICKED,
             $push: { statusLogs: statusUpdate }
         },
-        { 
-            new: true, 
-            runValidators: true 
+        {
+            new: true,
+            runValidators: true
         }
     );
 
@@ -152,11 +192,11 @@ const inTransitParcel = async (trackingId: string, userId: string) => {
         throw new AppError(httpStatus.UNAUTHORIZED, "User not found");
     }
 
-    
+
     validateStatusTransition(
         parcel,
-        STATUS.IN_TRANSIT, 
-        user              
+        STATUS.IN_TRANSIT,
+        user
     );
 
     // Prepare status log entry
@@ -193,8 +233,8 @@ const deliverParcel = async (trackingId: string, receiverPhone: string, userId?:
         throw new AppError(httpStatus.FORBIDDEN, "You are not authorized to receive this parcel");
     }
 
-    if(!user){
-        throw new AppError(httpStatus.BAD_REQUEST,"User not found")
+    if (!user) {
+        throw new AppError(httpStatus.BAD_REQUEST, "User not found")
     }
     validateStatusTransition(
         parcel,
@@ -206,7 +246,7 @@ const deliverParcel = async (trackingId: string, receiverPhone: string, userId?:
         status: STATUS.DELIVERED,
         timestamp: new Date(),
         location: parcel.destinationAddress?.district || 'Unknown',
-        notes: userId 
+        notes: userId
             ? `Delivered by ${user?.name} (${user?.userType}) to ${receiverPhone}`
             : `Received by customer (${receiverPhone})`
     };
@@ -219,9 +259,9 @@ const deliverParcel = async (trackingId: string, receiverPhone: string, userId?:
             $push: { statusLogs: statusUpdate },
             deliveredAt: new Date() // Add delivery timestamp
         },
-        { 
+        {
             new: true,
-            runValidators: true 
+            runValidators: true
         }
     );
 
@@ -257,10 +297,10 @@ const parcelStatus = async (trackingId: string) => {
     return parcel.statusLogs
 
 }
-const getReceiverParcel=async()=>{
-    const parcels=await Parcel.find({currentStatus:STATUS.IN_TRANSIT})
-    if(!parcels){
-        throw new AppError(httpStatus.BAD_REQUEST,"Parcels does not exists")
+const getReceiverParcel = async () => {
+    const parcels = await Parcel.find({ currentStatus: STATUS.IN_TRANSIT })
+    if (!parcels) {
+        throw new AppError(httpStatus.BAD_REQUEST, "Parcels does not exists")
     }
     return parcels
 }
@@ -268,6 +308,7 @@ const getReceiverParcel=async()=>{
 
 export const ParcelServices = {
     createParcel,
+    updateParcel,
     getMyParcels,
     getAllParcel,
     cancelParcel,

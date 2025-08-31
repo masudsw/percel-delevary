@@ -25,10 +25,16 @@ router.get(
     ParcelController.getReceiverParcel
 );
 router.get(
-    '/myParcel',
+    '/my-parcel',
     checkAuth(UserType.SENDER),
     ParcelController.getMyPercels
 
+);
+
+router.patch(
+    '/:id',
+    checkAuth(UserType.SENDER,UserType.ADMIN),
+    ParcelController.updateParcel  
 );
 router.get(
     '/:id',

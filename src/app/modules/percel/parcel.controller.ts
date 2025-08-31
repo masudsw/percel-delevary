@@ -23,6 +23,20 @@ const createParcel = catchAsync(
         });
     }
 );
+const updateParcel = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const decodeToken = req.user as JwtPayload;
+        const {id}=req.params;
+        const parcelData = req.body
+        const parcel = await ParcelServices.updateParcel(decodeToken.userId, id, parcelData);
+        sendResponse(res, {
+            success: true,
+            statusCode: httpStatus.CREATED,
+            message: "Parcel updated successfully",
+            data: parcel
+        });
+    }
+);
 const getMyPercels = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         const decodeToken = req.user as JwtPayload;
@@ -157,6 +171,7 @@ export const ParcelController = {
     pickParcel,
     inTransitParcel,
     parcelStatus,
-    getReceiverParcel
+    getReceiverParcel,
+    updateParcel
 
 };
