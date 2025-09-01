@@ -60,14 +60,14 @@ const logout = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         res.clearCookie("accessToken", {
             httpOnly: true,
-            secure: false, // Consider 'true' in production for HTTPS
-            sameSite: "lax",
+            secure: true, 
+            sameSite:"none",
         });
 
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.OK,
-            message: "User logged out successfully",
+            message: "User logged out successfully.......",
             data: null,
         });
     }

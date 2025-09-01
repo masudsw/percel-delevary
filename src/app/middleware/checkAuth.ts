@@ -9,7 +9,8 @@ import httpStatus from "http-status-codes"
 export const checkAuth = (...authUsers: string[]) => async (req: Request, res: Response, next: NextFunction) => {
     console.log("auth users",authUsers)
     try {
-        const accessToken = req.cookies.accessToken;
+        // const accessToken = req.cookies.accessToken;
+        const accessToken = req.headers.authorization || req.cookies.accessToken;
         console.log("inside try block....")
 
         if (!accessToken) {

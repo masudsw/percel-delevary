@@ -6,6 +6,7 @@ interface IEnvConfig {
     DB_URL: string,
     NODE_ENV: "development" | "production",
     FRONTEND_URL:string,
+    BACKEND_URL:string,
     SUPER_ADMIN_EMAIL: string,
     SUPER_ADMIN_PASSWORD: string,
     JWT_ACCESS_SECRET: string,
@@ -37,7 +38,7 @@ const loadEnvVariables = (): IEnvConfig => {
         "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET",
         "GOOGLE_CALLBACK_URL",
         "REDIS_USERNAME", "REDIS_PASSWORD", "REDIS_HOST", "REDIS_PORT",
-        " SMTP_PASS", "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_FROM"
+        " SMTP_PASS", "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_FROM","BACKEND_URL"
     ]
     requiredEnvVariables.forEach(key => {
         if (!process.env[key]) {
@@ -50,6 +51,7 @@ const loadEnvVariables = (): IEnvConfig => {
         DB_URL: process.env.DB_URL as string,
         NODE_ENV: process.env.NODE_ENV as "development" | "production",
         FRONTEND_URL:process.env.FRONTEND_URL as string,
+        BACKEND_URL:process.env.BACKEND_URL as string,
         JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET as string,
         JWT_ACCESS_EXPIRES: process.env.JWT_ACCESS_EXPIRES as string,
         EXPRESS_SESSION_SECRET: process.env.EXPRESS_SESSION_SECRET as string,
